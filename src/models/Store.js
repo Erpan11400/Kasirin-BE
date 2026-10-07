@@ -11,7 +11,7 @@ const storeSchema = new mongoose.Schema(
             type: String,
             required: [true, 'Kategori bisnis wajib diisi'],
             trim: true,
-    },
+        },
         phone: {
             type: String,
             required: [true, 'Nomor telepon toko wajib diisi'],

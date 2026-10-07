@@ -7,6 +7,16 @@ const productSchema = new mongoose.Schema(
             required: [true, 'Nama produk wajib diisi'],
             trim: true,
         },
+        code: {
+            type: String,
+            default: '',
+            trim: true,
+        },
+        unit: {
+            type: String,
+            default: 'pcs',
+            trim: true,
+        },
         price: {
             type: Number,
             required: [true, 'Harga produk wajib diisi'],

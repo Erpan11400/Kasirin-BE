@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             default: true, // Soft-delete / pembekuan akun
         },
+        lastLogin: {
+            type: Date,
+            default: Date.now,
+        },
     },
     { timestamps: true }
 );

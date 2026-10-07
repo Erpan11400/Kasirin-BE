@@ -12,7 +12,7 @@ const app = express()
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173'}))
 app.use(express.json())
 connectDB()
-app.use(routes)
+app.use('/api', routes)
 app.use(ErrorHandler)
 
 export default app

@@ -1,4 +1,4 @@
-import AuthorizationError from '../exceptions/authorization-error.js';
+import ForbiddenError from '../exceptions/forbidden-error.js';
 
 export const PermissionAction = Object.freeze({
     View: 'view',
@@ -15,14 +15,17 @@ export const PermissionAction = Object.freeze({
 const Authorization = (moduleName, action) => {
     return (req, _, next) => {
         try {
-            // console.log(req.user.permissions)
             // Ambil permissions dari req.user (diisi oleh middleware Authentication/JWT)
             const userPermissions = req.user?.permissions;
 
-            // Cek apakah modul dan aksi tersebut diizinkan (bernilai true)
-            const hasPermission = userPermissions?.[moduleName]?.[action] === true;
+            const requiredPermission = `${moduleName}:${action}`;
 
-            if (!hasPermission) return next(new AuthorizationError(`Anda tidak memiliki akses ${action} untuk modul ${moduleName}`))
+            // Cek apakah modul dan aksi tersebut diizinkan (mendukung format array 'module:action' dan object lama)
+            const hasPermission = Array.isArray(userPermissions)
+                ? userPermissions.includes(requiredPermission)
+                : userPermissions?.[moduleName]?.[action] === true;
+
+            if (!hasPermission) return next(new ForbiddenError(`Anda tidak memiliki akses ${action} untuk modul ${moduleName}`));
 
             next();
         } catch (error) {

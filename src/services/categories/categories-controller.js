@@ -4,17 +4,21 @@ import response from "../../utils/response.js";
 import Categories from "../../models/Categories.js";
 
 export const createCategories = async (req, res, next) => {
-    const { name } = req.body
-    if (!name) return next(new InvariantError("Nama kategori wajib diisi"))
+    try {
+        const { name } = req.body
+        if (!name) return next(new InvariantError("Nama kategori wajib diisi"))
 
-    const existingCategories = await Categories.findOne({ name })
-    if (existingCategories) return next(new InvariantError("Nama kategori sudah digunakan"))
+        const existingCategories = await Categories.findOne({ name })
+        if (existingCategories) return next(new InvariantError("Nama kategori sudah digunakan"))
 
-    const newCategories = await Categories.create({
-        name
-    })
+        const newCategories = await Categories.create({
+            name
+        })
 
-    return response(res, 201, 'Tambah kategori berhasil', { id: newCategories.id })
+        return response(res, 201, 'Tambah kategori berhasil', { id: newCategories.id })
+    } catch (error) {
+        return next(error)
+    }
 }
 
 export const getAllCategories = async (_, res, next) => {
@@ -48,12 +52,16 @@ export const updateCategories = async (req, res, next) => {
 }
 
 export const deleteCategories = async (req, res, next) => {
-    const { id } = req.params
-    if (!id) return next(new InvariantError("ID kategori wajib diisi"))
+    try {
+        const { id } = req.params
+        if (!id) return next(new InvariantError("ID kategori wajib diisi"))
 
-    const existingCategory = await Categories.findById(id)
-    if (!existingCategory) return next(new InvariantError("Kategori tidak ditemukan"))
+        const existingCategory = await Categories.findById(id)
+        if (!existingCategory) return next(new NotFoundError("Kategori tidak ditemukan"))
 
-    await Category.deleteOne({ _id: id })
-    return response(res, 200, 'Kategori berhasil dihapus')
+        await Categories.deleteOne({ _id: id })
+        return response(res, 200, 'Kategori berhasil dihapus')
+    } catch (error) {
+        return next(error)
+    }
 }

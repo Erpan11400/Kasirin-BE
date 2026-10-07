@@ -8,6 +8,7 @@ const router = Router();
 
 export const adminRoleData = {
     name: 'Admin',
+    description: 'Role Administrator dengan hak akses penuh ke seluruh fitur sistem',
     isSystemRole: true,
     permissions: {
         categories: {
@@ -60,7 +61,7 @@ router.post('/', async (req, res, next) => {
             adminRole = await Role.findOneAndUpdate(
                 { name: adminRoleData.name },
                 { $set: adminRoleData },
-                { new: true }
+                { returnDocument: 'after' }
             );
         }
 
@@ -91,6 +92,7 @@ router.post('/', async (req, res, next) => {
             role: {
                 id: adminRole._id,
                 name: adminRole.name,
+                description: adminRole.description,
                 isSystemRole: adminRole.isSystemRole,
                 permissions: adminRole.permissions,
             },

@@ -6,21 +6,36 @@ import response from "../../utils/response.js"
 
 export const createProducts = async (req, res, next) => {
     try {
-        const { name, price, stock, image, categoryId } = req.body
-        if (!name || price === 0) return next(new InvariantError("Nama dan Harga wajib diisi"))
+        const { name, code, price, stock, unit, categoryId, imageUrl } = req.body
+        if (!name || price === undefined || price === null || price < 0) {
+            return next(new InvariantError("Nama dan Harga wajib diisi dengan benar"))
+        }
+        if (stock === undefined || stock === null || stock < 0) {
+            return next(new InvariantError("Stok wajib diisi dengan benar"))
+        }
+        if (!categoryId) {
+            return next(new InvariantError("Kategori produk wajib dipilih"))
+        }
 
-        const existProduct = await Product.findOne({ name })
+        const existProduct = await Product.findOne({ name: name.trim() })
         if (existProduct) return next(new InvariantError("Produk sudah ada"))
+
+        if (code && code.trim() !== '') {
+            const existCode = await Product.findOne({ code: code.trim() })
+            if (existCode) return next(new InvariantError("Kode produk sudah digunakan"))
+        }
 
         const existCategory = await Categories.findById(categoryId)
         if (!existCategory) return next(new NotFoundError("Kategori tidak ditemukan"))
 
         const newProduct = await Product.create({
-            name,
+            name: name.trim(),
+            code: code ? code.trim() : '',
             price,
             stock,
-            image,
-            categoryId
+            unit: unit ? unit.trim() : 'pcs',
+            categoryId,
+            imageUrl: imageUrl || '',
         })
 
         return response(res, 201, "Produk berhasil ditambahkan", { id: newProduct._id })
@@ -42,24 +57,46 @@ export const getAllProducts = async (req, res, next) => {
 export const updateProducts = async (req, res, next) => {
     try {
         const { id } = req.params
-        if(!id) return next(new InvariantError("ID produk wajib diisi"))
+        if (!id) return next(new InvariantError("ID produk wajib diisi"))
 
         const existProduct = await Product.findById(id)
         if (!existProduct) return next(new NotFoundError("Produk tidak ditemukan"))
 
-        const { name, price, stock, image, categoryId } = req.body
-        if (!name || price === 0) return next(new InvariantError("Nama dan Harga wajib diisi"))
+        const { name, code, price, stock, unit, categoryId, imageUrl } = req.body
 
-        const existCategory = await Categories.findById(categoryId)
-        if (!existCategory) return next(new InvariantError("Kategori tidak ditemukan"))
+        if (price !== undefined && (price === null || price < 0)) {
+            return next(new InvariantError("Harga tidak boleh bernilai negatif"))
+        }
+
+        if (stock !== undefined && (stock === null || stock < 0)) {
+            return next(new InvariantError("Stok tidak boleh bernilai negatif"))
+        }
+
+        if (code !== undefined && code.trim() !== '') {
+            const existCode = await Product.findOne({ code: code.trim(), _id: { $ne: id } })
+            if (existCode) return next(new InvariantError("Kode produk sudah digunakan oleh produk lain"))
+        }
+
+        if (name !== undefined && name.trim() !== '' && name.trim() !== existProduct.name) {
+            const duplicateName = await Product.findOne({ name: name.trim(), _id: { $ne: id } })
+            if (duplicateName) return next(new InvariantError("Nama produk sudah ada"))
+        }
+
+        if (categoryId !== undefined && categoryId !== existProduct.categoryId?.toString()) {
+            const existCategory = await Categories.findById(categoryId)
+            if (!existCategory) return next(new NotFoundError("Kategori tidak ditemukan"))
+        }
 
         await Product.updateOne({ _id: id }, {
-            name,
-            price,
-            stock,
-            image,
-            categoryId
+            name: name !== undefined ? name.trim() : existProduct.name,
+            code: code !== undefined ? code.trim() : existProduct.code,
+            price: price !== undefined ? price : existProduct.price,
+            stock: stock !== undefined ? stock : existProduct.stock,
+            unit: unit !== undefined ? unit.trim() : (existProduct.unit || 'pcs'),
+            categoryId: categoryId !== undefined ? categoryId : existProduct.categoryId,
+            imageUrl: imageUrl !== undefined ? imageUrl : (existProduct.imageUrl || ''),
         })
+
         return response(res, 200, "Produk berhasil diupdate")
     } catch (error) {
         return next(error)

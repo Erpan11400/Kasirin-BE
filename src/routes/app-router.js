@@ -1,5 +1,4 @@
 import { Router } from "express";
-import kasirRoute from '../services/pos/kasir-route.js'
 import authRoute from '../services/auth/login-route.js'
 import roleRoute from '../services/role/role-route.js'
 import userRoute from "../services/users/users-route.js";
@@ -17,8 +16,6 @@ router.get('/', (_, res) => {
 
 // Authenticatiion
 router.use('/auth', authRoute)
-// Kasir
-router.use('/pos', kasirRoute)
 // Role
 router.use('/roles', roleRoute)
 // Users

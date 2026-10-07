@@ -19,6 +19,11 @@ const roleSchema = new mongoose.Schema(
             unique: true,
             trim: true, // Contoh: "Administrator", "Kasir", "Manajer Toko"
         },
+        description: {
+            type: String,
+            default: null,
+            trim: true,
+        },
         isSystemRole: {
             type: Boolean,
             default: false, // Role bawaan sistem (Admin) tidak bisa dihapus
