@@ -1,10 +1,15 @@
 import { Router } from "express";
+import { createTransaction } from "./transaction-controller.js";
+import Authentication from "../../middlewares/authentication.js";
+import Authorization, { PermissionAction } from "../../middlewares/authorization.js";
 import response from "../../utils/response.js";
 
-const router = Router()
+const nameModule = 'transactions';
+const router = Router();
 
-router.get('/', (req, res, next) => {
-    return response(res, 200, "Data Transaksi Berhasil Diambill")
-})
+router.post('/', Authentication, Authorization(nameModule, PermissionAction.Create), createTransaction);
+router.get('/', Authentication, Authorization(nameModule, PermissionAction.View), (req, res, next) => {
+    return response(res, 200, "Data Transaksi Berhasil Diambil");
+});
 
-export default router
+export default router;

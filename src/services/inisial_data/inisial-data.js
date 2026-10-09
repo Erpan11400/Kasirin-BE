@@ -2,6 +2,7 @@ import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import Role from '../../models/Roles.js';
 import User from '../../models/Users.js';
+import Store from '../../models/Store.js';
 import response from '../../utils/response.js';
 
 const router = Router();
@@ -50,6 +51,15 @@ export const adminRoleData = {
     },
 };
 
+export const initialStoreData = {
+    name: 'Mie Ayam Pakdhe',
+    businessCategory: 'Food and Beverage',
+    phone: '081234567890',
+    address: 'Jl. Merdeka No. 123, RT 01/RW 02, Kec. Kebayoran Baru, Kota Jakarta Selatan, DKI Jakarta 12110',
+    footerNote: 'Terima Kasih Telah Berbelanja di Toko Kami! Barang yang sudah dibeli tidak dapat ditukar kembali.',
+    showQris: true,
+};
+
 router.post('/', async (req, res, next) => {
     try {
         // 1. Inisialisasi Role Admin (Create jika belum ada, Update jika sudah ada)
@@ -88,7 +98,20 @@ router.post('/', async (req, res, next) => {
             await adminUser.save();
         }
 
-        return response(res, 201, 'Inisialisasi Role Admin dan Pengguna berhasil', {
+        // 3. Inisialisasi Data Store
+        let store = await Store.findOne();
+
+        if (!store) {
+            store = await Store.create(initialStoreData);
+        } else {
+            store = await Store.findOneAndUpdate(
+                {},
+                { $set: initialStoreData },
+                { returnDocument: 'after' }
+            );
+        }
+
+        return response(res, 201, 'Inisialisasi Role Admin, Pengguna, dan Toko berhasil', {
             role: {
                 id: adminRole._id,
                 name: adminRole.name,
@@ -103,6 +126,16 @@ router.post('/', async (req, res, next) => {
                 roleId: adminUser.roleId,
                 isActive: adminUser.isActive,
                 defaultPassword: rawPassword, // Sebagai informasi saat inisialisasi awal
+            },
+            store: {
+                id: store._id,
+                name: store.name,
+                businessCategory: store.businessCategory,
+                phone: store.phone,
+                address: store.address,
+                imageUrl: store.imageUrl,
+                footerNote: store.footerNote,
+                showQris: store.showQris,
             },
         });
     } catch (error) {

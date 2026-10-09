@@ -26,6 +26,15 @@ const storeSchema = new mongoose.Schema(
             type: String,
             default: '',
         },
+        footerNote: {
+            type: String,
+            default: '',
+            trim: true,
+        },
+        showQris: {
+            type: Boolean,
+            default: false,
+        },
     },
     { timestamps: true }
 );

@@ -6,6 +6,7 @@ import categoriesRoute from '../services/categories/categories-route.js'
 import productsRoute from '../services/products/product-route.js'
 import transactionsRoute from '../services/transactions/transaction-route.js'
 import inisialRoute from '../services/inisial_data/inisial-data.js'
+import storeRoute from '../services/store/store-route.js'
 import response from "../utils/response.js";
 
 const router = Router()
@@ -16,6 +17,8 @@ router.get('/', (_, res) => {
 
 // Authenticatiion
 router.use('/auth', authRoute)
+// Store
+router.use('/store', storeRoute)
 // Role
 router.use('/roles', roleRoute)
 // Users
