@@ -117,3 +117,12 @@ export const deleteProducts = async (req, res, next) => {
         return next(error)
     }
 }
+
+export const getProductNames = async (req, res, next) => {
+    try {
+        const products = await Product.find().select('_id name').sort({ name: 1 })
+        return response(res, 200, "Data nama produk berhasil diambil", products)
+    } catch (error) {
+        return next(error)
+    }
+}
