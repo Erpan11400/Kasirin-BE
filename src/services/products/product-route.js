@@ -8,8 +8,8 @@ const nameModule = 'products'
 const router = Router()
 
 router.post('/', Authentication, Authorization(nameModule, PermissionAction.Create), createProducts)
-router.get('/names', Authentication, Authorization(nameModule, PermissionAction.View), getProductNames)
-router.get('/', Authentication, Authorization(nameModule, PermissionAction.View), getAllProducts)
+router.get('/names', Authentication, getProductNames)
+router.get('/', Authentication, getAllProducts)
 router.put('/:id', Authentication, Authorization(nameModule, PermissionAction.Update), updateProducts)
 router.delete('/:id', Authentication, Authorization(nameModule, PermissionAction.Delete), deleteProducts)
 
