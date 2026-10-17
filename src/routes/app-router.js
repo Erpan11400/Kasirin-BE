@@ -7,7 +7,7 @@ import productsRoute from '../services/products/product-route.js'
 import transactionsRoute from '../services/transactions/transaction-route.js'
 import inisialRoute from '../services/inisial_data/inisial-data.js'
 import storeRoute from '../services/store/store-route.js'
-import reportsRoute from '../services/reports/report-route.js'
+import exportRoute from '../services/export/export-route.js'
 import response from "../utils/response.js";
 
 const router = Router()
@@ -30,8 +30,8 @@ router.use('/categories', categoriesRoute)
 router.use('/products', productsRoute)
 // Transaction
 router.use('/transactions', transactionsRoute)
-// Reports PDF & Export
-router.use('/reports', reportsRoute)
+// Export (Report PDF & Raw Data Excel)
+router.use('/export', exportRoute)
 // Inisial Data
 router.use('/initial', inisialRoute)
 
