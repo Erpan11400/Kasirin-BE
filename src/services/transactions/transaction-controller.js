@@ -91,6 +91,10 @@ export const createTransactions = async (req, res, next) => {
                 return next(new NotFoundError(`Produk dengan ID ${item.productId} tidak ditemukan`));
             }
 
+            if (product.isActive === false) {
+                return next(new InvariantError(`Produk "${product.name}" saat ini tidak aktif`));
+            }
+
             if (product.stock < quantity) {
                 return next(new InvariantError(`Stok produk "${product.name}" tidak mencukupi (Tersisa: ${product.stock}, diminta: ${quantity})`));
             }

@@ -37,6 +37,10 @@ const productSchema = new mongoose.Schema(
             ref: 'Categories',
             required: [true, 'Kategori produk wajib dipilih'],
         },
+        isActive: {
+            type: Boolean,
+            default: true,
+        },
     },
     { timestamps: true }
 );

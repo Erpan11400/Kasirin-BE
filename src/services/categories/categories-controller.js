@@ -5,14 +5,15 @@ import Categories from "../../models/Categories.js";
 
 export const createCategories = async (req, res, next) => {
     try {
-        const { name } = req.body
+        const { name, isActive } = req.body
         if (!name) return next(new InvariantError("Nama kategori wajib diisi"))
 
-        const existingCategories = await Categories.findOne({ name })
+        const existingCategories = await Categories.findOne({ name: name.trim() })
         if (existingCategories) return next(new InvariantError("Nama kategori sudah digunakan"))
 
         const newCategories = await Categories.create({
-            name
+            name: name.trim(),
+            isActive: isActive !== undefined ? Boolean(isActive) : true,
         })
 
         return response(res, 201, 'Tambah kategori berhasil', { id: newCategories.id })
@@ -34,15 +35,27 @@ export const updateCategories = async (req, res, next) => {
     try {
         const { id } = req.params
         if (!id) return next(new InvariantError("ID kategori wajib diisi"))
-        const { name } = req.body
-        if (!name) return next(new InvariantError("Nama kategori wajib diisi"))
+        const { name, isActive } = req.body
+        if (!name && isActive === undefined) return next(new InvariantError("Data kategori yang diupdate wajib diisi"))
 
         const existingCategories = await Categories.findById(id)
         if (!existingCategories) return next(new NotFoundError("Kategori tidak ditemukan"))
 
-        if (existingCategories.name === name) return next(new InvariantError("Nama kategori sudah digunakan"))
+        if (name !== undefined) {
+            const trimmedName = name.trim()
+            if (!trimmedName) return next(new InvariantError("Nama kategori wajib diisi"))
 
-        existingCategories.name = name
+            if (trimmedName !== existingCategories.name) {
+                const duplicateName = await Categories.findOne({ name: trimmedName, _id: { $ne: id } })
+                if (duplicateName) return next(new InvariantError("Nama kategori sudah digunakan"))
+            }
+            existingCategories.name = trimmedName
+        }
+
+        if (isActive !== undefined) {
+            existingCategories.isActive = Boolean(isActive)
+        }
+
         await existingCategories.save()
 
         return response(res, 200, 'Kategori berhasil diupdate')
@@ -59,8 +72,10 @@ export const deleteCategories = async (req, res, next) => {
         const existingCategory = await Categories.findById(id)
         if (!existingCategory) return next(new NotFoundError("Kategori tidak ditemukan"))
 
-        await Categories.deleteOne({ _id: id })
-        return response(res, 200, 'Kategori berhasil dihapus')
+        existingCategory.isActive = false
+        await existingCategory.save()
+
+        return response(res, 200, 'Kategori berhasil dinonaktifkan')
     } catch (error) {
         return next(error)
     }

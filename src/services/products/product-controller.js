@@ -6,7 +6,7 @@ import response from "../../utils/response.js"
 
 export const createProducts = async (req, res, next) => {
     try {
-        const { name, code, price, stock, unit, categoryId, imageUrl } = req.body
+        const { name, code, price, stock, unit, categoryId, imageUrl, isActive } = req.body
         if (!name || price === undefined || price === null || price < 0) {
             return next(new InvariantError("Nama dan Harga wajib diisi dengan benar"))
         }
@@ -27,6 +27,7 @@ export const createProducts = async (req, res, next) => {
 
         const existCategory = await Categories.findById(categoryId)
         if (!existCategory) return next(new NotFoundError("Kategori tidak ditemukan"))
+        if (existCategory.isActive === false) return next(new InvariantError("Kategori yang dipilih tidak aktif"))
 
         const newProduct = await Product.create({
             name: name.trim(),
@@ -36,6 +37,7 @@ export const createProducts = async (req, res, next) => {
             unit: unit ? unit.trim() : 'pcs',
             categoryId,
             imageUrl: imageUrl || '',
+            isActive: isActive !== undefined ? Boolean(isActive) : true,
         })
 
         return response(res, 201, "Produk berhasil ditambahkan", { id: newProduct._id })
@@ -45,9 +47,9 @@ export const createProducts = async (req, res, next) => {
     }
 }
 
-export const getAllProducts = async (req, res, next) => {
+export const getAllProducts = async (_, res, next) => {
     try {
-        const products = await Product.find().populate('categoryId', 'name')
+        const products = await Product.find().populate('categoryId', 'name isActive')
         return response(res, 200, "Produk berhasil diambil", products)
     } catch (error) {
         return next(error)
@@ -62,7 +64,7 @@ export const updateProducts = async (req, res, next) => {
         const existProduct = await Product.findById(id)
         if (!existProduct) return next(new NotFoundError("Produk tidak ditemukan"))
 
-        const { name, code, price, stock, unit, categoryId, imageUrl } = req.body
+        const { name, code, price, stock, unit, categoryId, imageUrl, isActive } = req.body
 
         if (price !== undefined && (price === null || price < 0)) {
             return next(new InvariantError("Harga tidak boleh bernilai negatif"))
@@ -85,6 +87,7 @@ export const updateProducts = async (req, res, next) => {
         if (categoryId !== undefined && categoryId !== existProduct.categoryId?.toString()) {
             const existCategory = await Categories.findById(categoryId)
             if (!existCategory) return next(new NotFoundError("Kategori tidak ditemukan"))
+            if (existCategory.isActive === false) return next(new InvariantError("Kategori yang dipilih tidak aktif"))
         }
 
         await Product.updateOne({ _id: id }, {
@@ -95,6 +98,7 @@ export const updateProducts = async (req, res, next) => {
             unit: unit !== undefined ? unit.trim() : (existProduct.unit || 'pcs'),
             categoryId: categoryId !== undefined ? categoryId : existProduct.categoryId,
             imageUrl: imageUrl !== undefined ? imageUrl : (existProduct.imageUrl || ''),
+            isActive: isActive !== undefined ? Boolean(isActive) : existProduct.isActive,
         })
 
         return response(res, 200, "Produk berhasil diupdate")
@@ -111,16 +115,18 @@ export const deleteProducts = async (req, res, next) => {
         const existProduct = await Product.findById(id)
         if (!existProduct) return next(new NotFoundError("Produk tidak ditemukan"))
 
-        await Product.deleteOne({ _id: id })
-        return response(res, 200, "Produk berhasil dihapus", { id: existProduct._id })
+        existProduct.isActive = false
+        await existProduct.save()
+
+        return response(res, 200, "Produk berhasil dinonaktifkan", { id: existProduct._id })
     } catch (error) {
         return next(error)
     }
 }
 
-export const getProductNames = async (req, res, next) => {
+export const getProductNames = async (_, res, next) => {
     try {
-        const products = await Product.find().select('_id name').sort({ name: 1 })
+        const products = await Product.find().select('_id name isActive').sort({ name: 1 })
         return response(res, 200, "Data nama produk berhasil diambil", products)
     } catch (error) {
         return next(error)
