@@ -6,7 +6,7 @@ import response from "../../utils/response.js"
 
 export const createProducts = async (req, res, next) => {
     try {
-        const { name, code, price, stock, unit, categoryId, imageUrl, isActive } = req.body
+        const { name, code, price, stock, unit, categoryId, isActive } = req.body
         if (!name || price === undefined || price === null || price < 0) {
             return next(new InvariantError("Nama dan Harga wajib diisi dengan benar"))
         }
@@ -36,7 +36,6 @@ export const createProducts = async (req, res, next) => {
             stock,
             unit: unit ? unit.trim() : 'pcs',
             categoryId,
-            imageUrl: imageUrl || '',
             isActive: isActive !== undefined ? Boolean(isActive) : true,
         })
 
@@ -64,7 +63,7 @@ export const updateProducts = async (req, res, next) => {
         const existProduct = await Product.findById(id)
         if (!existProduct) return next(new NotFoundError("Produk tidak ditemukan"))
 
-        const { name, code, price, stock, unit, categoryId, imageUrl, isActive } = req.body
+        const { name, code, price, stock, unit, categoryId, isActive } = req.body
 
         if (price !== undefined && (price === null || price < 0)) {
             return next(new InvariantError("Harga tidak boleh bernilai negatif"))
@@ -97,7 +96,6 @@ export const updateProducts = async (req, res, next) => {
             stock: stock !== undefined ? stock : existProduct.stock,
             unit: unit !== undefined ? unit.trim() : (existProduct.unit || 'pcs'),
             categoryId: categoryId !== undefined ? categoryId : existProduct.categoryId,
-            imageUrl: imageUrl !== undefined ? imageUrl : (existProduct.imageUrl || ''),
             isActive: isActive !== undefined ? Boolean(isActive) : existProduct.isActive,
         })
 

@@ -50,7 +50,6 @@ export const updateStore = async (req, res, next) => {
             businessCategory,
             phone,
             address,
-            imageUrl,
             footerNote,
             showQris,
         } = req.body;
@@ -84,7 +83,6 @@ export const updateStore = async (req, res, next) => {
             businessCategory: businessCategory.trim(),
             phone: phone.trim(),
             address: address.trim(),
-            imageUrl: imageUrl !== undefined ? imageUrl : (store?.imageUrl || ""),
             footerNote: footerNote !== undefined ? footerNote.trim() : (store?.footerNote || ""),
             showQris: showQris !== undefined ? Boolean(showQris) : (store?.showQris ?? false),
         };
