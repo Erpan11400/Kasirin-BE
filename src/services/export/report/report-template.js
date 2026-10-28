@@ -88,12 +88,11 @@ export const generateReportHtml = ({
     data = [],
 }) => {
     const isLandscape = meta.orientation === 'landscape';
-    const storeName = store.name || 'KASIRIN POINT OF SALE';
-    const storeAddress = store.address || 'Jl. Bisnis Raya No. 88, Jakarta Selatan';
-    const storePhone = store.phone || '0812-3456-7890';
-    const storeCategory = store.businessCategory || 'RETAIL & MINIMARKET';
-    const storeLogo = store.imageUrl || store.logoUrl || '';
-    const storeInitials = getStoreInitials(storeName);
+    const storeName = store.name || store.storeName || 'KASIRIN POINT OF SALE';
+    const storeAddress = store.address || '';
+    const storePhone = store.phone || '';
+    const storeCategory = store.businessCategory || store.category || '';
+    const printDateTime = formatPrintedTimestamp(new Date());
 
     const showKpis = meta.showKpis !== false;
     const showSignatures = meta.showSignatures !== false;
@@ -334,42 +333,63 @@ export const generateReportHtml = ({
   </style>
 </head>
 <body style="padding: 4px;">
-  <!-- ================= 1. KOP SURAT RESMI ================= -->
-  <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0f172a; padding-bottom: 20px;">
-    <!-- Sisi Kiri: Identitas Usaha -->
+  <!-- ================= 1. KOP DOKUMEN: IDENTITAS KASIRIN & TOKO ================= -->
+  <div style="display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 2px solid #0f172a; padding-bottom: 18px; margin-bottom: 16px;">
     <div style="display: flex; align-items: flex-start; gap: 16px;">
-      <!-- Logo atau Inisial -->
-      ${storeLogo 
-        ? `<img src="${storeLogo}" style="width: 64px; height: 64px; object-fit: contain; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px;" alt="Logo Toko" />`
-        : `<div style="width: 56px; height: 56px; background-color: #0f172a; color: #ffffff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; letter-spacing: 1px;">${storeInitials}</div>`
-      }
-      <div>
-        <h1 style="font-size: 20px; font-weight: 900; color: #0f172a; text-transform: uppercase; letter-spacing: -0.02em;">
+      <!-- Logo Brand KasirIn Web (Pill Variant) -->
+      <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+        <div style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #006948 0%, #059669 50%, #14b8a6 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px -1px rgba(0, 105, 72, 0.25);">
+          <span style="color: #ffffff; font-weight: 900; font-size: 17px; line-height: 1; letter-spacing: -0.5px; font-family: sans-serif;">
+            K<span style="color: #a7f3d0; margin-left: 1px;">•</span>
+          </span>
+        </div>
+        <div style="display: flex; flex-direction: column; justify-content: center; line-height: 1.1;">
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <span style="font-weight: 900; font-size: 18px; color: #0f172a; letter-spacing: -0.5px; font-family: sans-serif;">Kasir</span>
+            <span style="background-color: #006948; color: #ffffff; font-size: 11px; font-weight: 800; padding: 2px 6px; border-radius: 6px; letter-spacing: 0.5px; font-family: sans-serif; line-height: 1;">IN</span>
+          </div>
+          <span style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; margin-top: 3px; font-family: sans-serif;">SMART POS UMKM</span>
+        </div>
+      </div>
+
+      <!-- Divider Pemisah -->
+      <div style="width: 1px; min-height: 42px; background-color: #cbd5e1; margin: 0 4px; align-self: stretch;"></div>
+
+      <!-- Detail Toko / Merchant -->
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <h1 style="margin: 0; font-size: 16px; font-weight: 900; color: #0f172a; text-transform: uppercase; letter-spacing: -0.3px; font-family: sans-serif;">
           ${storeName}
         </h1>
-        <p style="font-size: 11px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px;">
+        ${storeCategory ? `
+        <span style="font-size: 11px; font-weight: 600; color: #475569; text-transform: uppercase;">
           ${storeCategory}
-        </p>
-        <p style="font-size: 11px; color: #475569; max-width: 420px; margin-top: 2px;">
+        </span>
+        ` : ''}
+        ${storeAddress ? `
+        <span style="font-size: 11px; color: #64748b; max-width: 320px; line-height: 1.3;">
           ${storeAddress}
-        </p>
-        <p style="font-size: 11px; color: #475569; margin-top: 2px;">
-          Telp: <span class="mono">${storePhone}</span>
-        </p>
+        </span>
+        ` : ''}
+        ${storePhone ? `
+        <span style="font-size: 11px; color: #64748b; font-weight: 500;">
+          Telp: ${storePhone}
+        </span>
+        ` : ''}
       </div>
     </div>
-    <!-- Sisi Kanan: Metadata Dokumen -->
+
+    <!-- Sisi Kanan: Info Dokumen -->
     <div style="text-align: right;">
-      <div style="display: inline-block; background-color: #0f172a; color: #ffffff; font-size: 11px; font-weight: bold; padding: 4px 12px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em;">
-        DOKUMEN RESMI
+      <div style="display: inline-block; background-color: #0f172a; color: #ffffff; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; font-family: sans-serif;">
+        Dokumen Resmi
       </div>
-      <h2 style="font-size: 14px; font-weight: 800; color: #0f172a; margin-top: 6px; text-transform: uppercase;">
-        ${meta.reportTitle || 'LAPORAN RINCIAN TRANSAKSI PENJUALAN'}
-      </h2>
-      <div style="font-size: 11px; color: #64748b; margin-top: 6px; line-height: 1.6;">
-        <div>Periode: <strong style="color: #1e293b;">${meta.periodLabel || 'Semua Periode'}</strong></div>
-        <div>Dicetak: <span style="color: #334155;">${formatPrintedTimestamp(new Date())}</span></div>
-        <div>Operator: <strong style="color: #1e293b;">${meta.printedBy || 'Admin Kasir'}</strong></div>
+      <div style="font-size: 13px; font-weight: 800; color: #0f172a; margin-top: 5px; text-transform: uppercase;">
+        ${meta.reportTitle || 'LAPORAN TRANSAKSI PENJUALAN'}
+      </div>
+      <div style="font-size: 11px; color: #64748b; margin-top: 3px; line-height: 1.4;">
+        <div>Periode: <strong>${meta.periodLabel || 'Semua Periode'}</strong></div>
+        <div>Operator: <strong>${meta.printedBy || 'Admin Kasir'}</strong></div>
+        <div>Dicetak: <strong>${printDateTime}</strong></div>
       </div>
     </div>
   </div>

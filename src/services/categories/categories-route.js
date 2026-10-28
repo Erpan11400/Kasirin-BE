@@ -9,7 +9,7 @@ const router = Router()
 
 // Routing untuk category
 router.post('/', Authentication, Authorization(moduleName, PermissionAction.Create), createCategories)
-router.get('/', Authentication, Authorization(moduleName, PermissionAction.View), getAllCategories)
+router.get('/', Authentication, getAllCategories)
 router.put('/:id', Authentication, Authorization(moduleName, PermissionAction.Update), updateCategories)
 router.delete('/:id', Authentication, Authorization(moduleName, PermissionAction.Delete), deleteCategories)
 
